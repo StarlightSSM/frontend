@@ -1,4 +1,3 @@
-// src/types/types.ts
 export interface Comment {
   id: number
   postId: number
@@ -7,6 +6,7 @@ export interface Comment {
   password: string
   createdAt: string
   deleted?: boolean
+  updatedAt?: string
 }
 
 export interface Post {
@@ -14,6 +14,7 @@ export interface Post {
   title: string
   content: string
   nickname: string
+  password: string
   createdAt: string
   updatedAt?: string
   deleted?: boolean

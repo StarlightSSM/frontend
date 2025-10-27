@@ -1,4 +1,3 @@
-// src/components/Router.tsx
 import React from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { PostListPage } from "../pages/PostListPage.js"
