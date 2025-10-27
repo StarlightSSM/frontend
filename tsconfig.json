@@ -1,13 +1,14 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "baseUrl": "src",
     "paths": {
-      "@components/*": ["components/*"]
+      "@/*": ["*"]
     },
+    "moduleResolution": "nodenext",
     "jsx": "react-jsx",
     "target": "ESNext",
-    "module": "ESNext",
-  }
+    "module": "NodeNext",
+  },
 }
