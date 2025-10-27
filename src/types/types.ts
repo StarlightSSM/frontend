@@ -1,3 +1,4 @@
+// src/types/types.ts
 export interface Comment {
   id: number
   postId: number
