@@ -1,0 +1,13 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": "src",
+    "paths": {
+      "@components/*": ["components/*"]
+    },
+    "jsx": "react-jsx",
+    "target": "ESNext",
+    "module": "ESNext",
+  }
+}
