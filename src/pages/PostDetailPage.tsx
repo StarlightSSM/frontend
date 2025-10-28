@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { posts, comments } from "@/data/posts.js"
 import { Post, Comment } from "@/types/types.js"
 
-// ✅ 유효성 검사 함수
+// 유효성 검사 함수
 const isValidPassword = (s: string) => /^[0-9]{4}$/.test(s)
 const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
 const isValidContent = (s: string) => s.trim().length > 0 && s.trim().length <= 200
@@ -54,7 +54,7 @@ export const PostDetailPage: React.FC = () => {
     if (isSubmitting) return // 중복 클릭 방지
     setIsSubmitting(true)
 
-    // ✅ 0.8초 후 수정 반영
+    // 일정시간 후 게시글 수정 처리 (중복 제출 방지)
     setTimeout(() => {
       const updated = {
         ...post,
@@ -69,7 +69,7 @@ export const PostDetailPage: React.FC = () => {
       setEditingPost(false)
       alert("게시글이 수정되었습니다.")
 
-      // ✅ 0.7초 뒤 버튼 다시 활성화
+      // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
     }, 800)
   }
@@ -104,7 +104,7 @@ export const PostDetailPage: React.FC = () => {
       return setIsSubmitting(false)
     }
 
-    // ✅ 0.8초 후 댓글 반영 (작성 중... 표시 유지)
+    // 일정시간 후 댓글 반영 (중복 제출 방지)
     setTimeout(() => {
       const comment: Comment = {
         id: Date.now(),
@@ -121,7 +121,7 @@ export const PostDetailPage: React.FC = () => {
       setNewCommentNickname("")
       setNewCommentPassword("")
 
-      // ✅ 0.7초 뒤에 버튼 다시 활성화
+      // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
     }, 800)
   }
@@ -164,7 +164,7 @@ export const PostDetailPage: React.FC = () => {
       return setIsSubmitting(false)
     }
 
-    // ✅ 0.8초 후 수정 반영
+    // 일정시간 후 수정 반영(중복 제출 방지)
     setTimeout(() => {
       const idx = comments.findIndex((c) => c.id === id)
       if (idx === -1) return
@@ -188,7 +188,7 @@ export const PostDetailPage: React.FC = () => {
       setEditContent("")
       setEditNickname("")
 
-      // ✅ 0.7초 후 버튼 다시 활성화
+      // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
     }, 800)
   }
@@ -279,13 +279,17 @@ export const PostDetailPage: React.FC = () => {
                 {editingCommentId === c.id ? (
                   <div>
                     <input
-                      value={editNickname}
-                      onChange={(e) => setEditNickname(e.target.value)}
-                      className="border p-1 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
+                      value={newCommentNickname}
+                      onChange={(e) => setNewCommentNickname(e.target.value)}
+                      placeholder="닉네임 (1~10자)"
+                      aria-label="닉네임 입력"
+                      className="border p-2 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
                     />
                     <textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="댓글 내용 (1~200자)"
+                      aria-label="댓글 내용 입력"
                       className="border p-1 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
                     />
                     <div className="flex justify-end space-x-2">

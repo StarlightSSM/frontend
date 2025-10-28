@@ -42,12 +42,16 @@ export const CommentList: React.FC<Props> = ({ comments, onUpdate, onDelete }) =
                   value={editNickname}
                   onChange={(e) => setEditNickname(e.target.value)}
                   maxLength={10}
+                  placeholder="닉네임 (1~10자)"
+                  title="닉네임 입력란"
                   className="p-2 border rounded flex-1 focus:ring-2 focus:ring-blue-300"
                 />
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   maxLength={200}
+                  placeholder="댓글 내용 (1~200자)"
+                  title="댓글 수정 입력란"
                   className="p-2 border rounded flex-1 focus:ring-2 focus:ring-blue-300"
                 />
               </div>

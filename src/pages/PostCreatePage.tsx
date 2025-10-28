@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { posts } from "@/data/posts.js"
 import { Post } from "@/types/types.js"
 
-// ✅ 유효성 검사 함수
+// 유효성 검사 함수
 const isValidTitle = (s: string) => s.trim().length > 0 && s.trim().length <= 20
 const isValidContent = (s: string) => s.trim().length > 0 && s.trim().length <= 3000
 const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
@@ -22,7 +22,7 @@ export const PostCreatePage: React.FC = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    // ✅ 입력값 검증
+    // 입력값 검증
     if (!isValidTitle(title)) {
       alert("제목은 1~20자 이내로 입력해주세요.")
       return setIsSubmitting(false)
@@ -40,7 +40,7 @@ export const PostCreatePage: React.FC = () => {
       return setIsSubmitting(false)
     }
 
-    // ✅ 0.8초 후 게시글 추가 (작성 중... 표시 유지)
+    // 일정시간 후 게시글 추가 (중복 제출 방지)
     setTimeout(() => {
       const newPost: Post = {
         id: Date.now(),
@@ -54,7 +54,7 @@ export const PostCreatePage: React.FC = () => {
       posts.unshift(newPost)
       alert("게시글이 등록되었습니다.")
 
-      // ✅ 0.7초 뒤 버튼 다시 활성화
+      // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
 
       navigate("/")

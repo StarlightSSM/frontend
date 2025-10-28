@@ -37,7 +37,7 @@ export const PostForm: React.FC<PostFormProps> = ({ mode, initial = {}, onSubmit
     try {
       await onSubmit({ title, content, nickname, password })
     } finally {
-      // ✅ 일정 시간(예: 1.5초) 뒤 다시 활성화
+      // 일정시간 후 다시 활성화(중복 제출 방지)
       setTimeout(() => setSubmitting(false), 1500)
     }
   }

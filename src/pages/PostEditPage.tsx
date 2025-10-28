@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Post } from "@/types/types.js"
 import { posts } from "@/data/posts.js"
 
-// ✅ 유효성 검사 함수
+// 유효성 검사 함수
 const isValidTitle = (s: string) => s.trim().length > 0 && s.trim().length <= 20
 const isValidContent = (s: string) => s.trim().length > 0 && s.trim().length <= 3000
 const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
@@ -35,14 +35,14 @@ export const PostEditPage: React.FC = () => {
 
   if (!post) return <div className="p-4">게시글을 찾을 수 없습니다.</div>
 
-  // ✅ 수정 버튼 클릭 → 비밀번호 입력창 표시
+  // 수정 버튼 클릭 → 비밀번호 입력창 표시
   const handleStartUpdate = () => {
     setShowPwInput(true)
     setInputPw("")
     setPwError("")
   }
 
-  // ✅ 비밀번호 확인 후 수정 반영
+  // 비밀번호 확인 후 수정 반영
   const handleConfirmPassword = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
@@ -69,7 +69,7 @@ export const PostEditPage: React.FC = () => {
       return setIsSubmitting(false)
     }
 
-    // ✅ 0.8초 후 실제 수정 반영 (처리 중... 유지)
+    // 일정시간 후 실제 수정 반영 (중복 제출 방지)
     setTimeout(() => {
       const updated: Post = {
         ...post,
@@ -86,7 +86,7 @@ export const PostEditPage: React.FC = () => {
       alert("게시글이 수정되었습니다.")
       navigate(`/posts/${postId}`)
 
-      // ✅ 0.7초 뒤 버튼 다시 활성화
+      // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
     }, 800)
   }
@@ -116,7 +116,7 @@ export const PostEditPage: React.FC = () => {
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         />
 
-        {/* ✅ 비밀번호 입력 UI */}
+        {/* 비밀번호 입력 UI */}
         {showPwInput && (
           <div className="p-3 mb-4 border rounded bg-gray-50">
             <p className="mb-2 font-semibold text-gray-700">비밀번호 확인</p>
@@ -151,7 +151,7 @@ export const PostEditPage: React.FC = () => {
           </div>
         )}
 
-        {/* ✅ 기본 버튼 */}
+        {/* 기본 버튼 */}
         {!showPwInput && (
           <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
             <button

@@ -183,15 +183,22 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
       {/* ---------- 게시글 ---------- */}
       {editingPost ? (
         <div className="p-2 mb-4 border rounded bg-gray-50">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 mb-2 border rounded" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="제목을 입력하세요 (1~20자)"
+            className="w-full p-2 mb-2 border rounded"
+          />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            placeholder="내용을 입력하세요 (1~3000자)"
             className="w-full h-32 p-2 mb-2 border rounded"
           />
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
+            placeholder="닉네임을 입력하세요 (1~10자)"
             className="w-full p-2 mb-2 border rounded"
           />
           <div className="flex justify-end gap-2">
@@ -240,11 +247,15 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
                   <input
                     value={editingCommentNickname}
                     onChange={(e) => setEditingCommentNickname(e.target.value)}
+                    placeholder="닉네임 (1~10자)"
+                    title="닉네임 입력"
                     className="w-full p-1 mb-1 border rounded"
                   />
                   <textarea
                     value={editingCommentContent}
                     onChange={(e) => setEditingCommentContent(e.target.value)}
+                    placeholder="댓글 내용 (1~200자)"
+                    title="댓글 내용 입력"
                     className="w-full p-1 mb-1 border rounded"
                   />
                   <div className="flex justify-end gap-2">

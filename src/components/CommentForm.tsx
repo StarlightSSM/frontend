@@ -34,7 +34,7 @@ export const CommentForm: React.FC<Props> = ({ onSubmit }) => {
       setNickname("")
       setPassword("")
     } finally {
-      // ✅ 일정 시간(예: 1.5초) 뒤에 다시 활성화
+      // 일정시간 후에 다시 활성화
       setTimeout(() => {
         setSubmitting(false)
       }, 1500)
