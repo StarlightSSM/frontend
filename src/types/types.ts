@@ -5,8 +5,8 @@ export interface Comment {
   nickname: string
   password: string
   createdAt: string
-  deleted?: boolean
   updatedAt?: string
+  deleted?: boolean
 }
 
 export interface Post {

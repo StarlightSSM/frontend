@@ -4,7 +4,5 @@ import { App } from "./App.js";
 import "./index.css"; // Tailwind 또는 기본 CSS
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );
