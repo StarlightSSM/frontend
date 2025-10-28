@@ -29,6 +29,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   const [title, setTitle] = useState(post.title)
   const [content, setContent] = useState(post.content)
   const [nickname, setNickname] = useState(post.nickname)
+  const [isPostSubmitting, setIsPostSubmitting] = useState(false)
 
   // 댓글 상태
   const [newCommentContent, setNewCommentContent] = useState("")
@@ -36,45 +37,56 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editingCommentContent, setEditingCommentContent] = useState("")
   const [editingCommentNickname, setEditingCommentNickname] = useState("")
+  const [isEditingCommentSubmitting, setIsEditingCommentSubmitting] = useState(false)
 
-  /* ---------- 게시글 수정 시작 (비밀번호 확인) ---------- */
+  /* ---------- 게시글 수정 ---------- */
   const handleStartEditPost = () => {
     const inputPw = window.prompt("게시글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== post.password) {
-      alert("비밀번호가 일치하지 않습니다.")
-      return
-    }
+    if (!isValidPassword(inputPw) || inputPw !== post.password)
+      return alert("비밀번호가 일치하지 않습니다.")
     setEditingPost(true)
   }
 
-  /* ---------- 게시글 수정 저장 ---------- */
   const handleSavePost = () => {
-    if (!isValidTitle(title)) return alert("제목은 1~20자 이내로 입력해주세요.")
-    if (!isValidContent(content, 3000)) return alert("내용은 1~3000자 이내로 입력해주세요.")
-    if (!isValidNickname(nickname)) return alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+    if (isPostSubmitting) return
+    setIsPostSubmitting(true)
 
-    const updated: Post = {
-      ...post,
-      title: title.trim(),
-      content: content.trim(),
-      nickname: nickname.trim(),
-      updatedAt: new Date().toISOString(),
+    if (!isValidTitle(title)) {
+      alert("제목은 1~20자 이내로 입력해주세요.")
+      return setIsPostSubmitting(false)
+    }
+    if (!isValidContent(content, 3000)) {
+      alert("내용은 1~3000자 이내로 입력해주세요.")
+      return setIsPostSubmitting(false)
+    }
+    if (!isValidNickname(nickname)) {
+      alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+      return setIsPostSubmitting(false)
     }
 
-    posts[postIndex] = updated
-    setPost(updated)
-    setEditingPost(false)
-    alert("게시글이 수정되었습니다.")
+    // 0.8초 지연 후 저장
+    setTimeout(() => {
+      const updated: Post = {
+        ...post,
+        title: title.trim(),
+        content: content.trim(),
+        nickname: nickname.trim(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      posts[postIndex] = updated
+      setPost(updated)
+      setEditingPost(false)
+      alert("게시글이 수정되었습니다.")
+      setTimeout(() => setIsPostSubmitting(false), 700)
+    }, 800)
   }
 
   /* ---------- 게시글 삭제 ---------- */
   const handleDeletePost = () => {
     const inputPw = window.prompt("게시글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== post.password) {
-      alert("비밀번호가 일치하지 않습니다.")
-      return
-    }
-
+    if (!isValidPassword(inputPw) || inputPw !== post.password)
+      return alert("비밀번호가 일치하지 않습니다.")
     posts[postIndex] = { ...posts[postIndex], deleted: true, updatedAt: new Date().toISOString() }
     alert("게시글이 삭제되었습니다.")
     navigate("/")
@@ -111,10 +123,8 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
     if (idx === -1) return
 
     const inputPw = window.prompt("댓글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== comments[idx].password) {
-      alert("비밀번호가 일치하지 않습니다.")
-      return
-    }
+    if (!isValidPassword(inputPw) || inputPw !== comments[idx].password)
+      return alert("비밀번호가 일치하지 않습니다.")
 
     comments[idx] = { ...comments[idx], deleted: true, updatedAt: new Date().toISOString() }
     setPostComments((prev) => prev.filter((c) => c.id !== id))
@@ -123,34 +133,43 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   /* ---------- 댓글 수정 ---------- */
   const handleStartEditComment = (c: Comment) => {
     const inputPw = window.prompt("댓글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== c.password) {
-      alert("비밀번호가 일치하지 않습니다.")
-      return
-    }
+    if (!isValidPassword(inputPw) || inputPw !== c.password)
+      return alert("비밀번호가 일치하지 않습니다.")
     setEditingCommentId(c.id)
     setEditingCommentContent(c.content)
     setEditingCommentNickname(c.nickname)
   }
 
   const handleSaveEditComment = (id: number) => {
+    if (isEditingCommentSubmitting) return
+    setIsEditingCommentSubmitting(true)
+
     const content = editingCommentContent.trim()
     const nick = editingCommentNickname.trim()
 
-    if (!isValidContent(content, 200)) return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
-    if (!isValidNickname(nick)) return alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+    if (!isValidContent(content, 200)) {
+      alert("댓글 내용은 1~200자 이내로 입력해주세요.")
+      return setIsEditingCommentSubmitting(false)
+    }
+    if (!isValidNickname(nick)) {
+      alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+      return setIsEditingCommentSubmitting(false)
+    }
 
-    const idx = comments.findIndex((c) => c.id === id)
-    if (idx === -1) return
+    setTimeout(() => {
+      const idx = comments.findIndex((c) => c.id === id)
+      if (idx === -1) return
 
-    comments[idx] = { ...comments[idx], content, nickname: nick, updatedAt: new Date().toISOString() }
-    setPostComments((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, content, nickname: nick, updatedAt: new Date().toISOString() } : c
+      comments[idx] = { ...comments[idx], content, nickname: nick, updatedAt: new Date().toISOString() }
+      setPostComments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, content, nickname: nick, updatedAt: new Date().toISOString() } : c))
       )
-    )
-    setEditingCommentId(null)
-    setEditingCommentContent("")
-    setEditingCommentNickname("")
+
+      setEditingCommentId(null)
+      setEditingCommentContent("")
+      setEditingCommentNickname("")
+      setTimeout(() => setIsEditingCommentSubmitting(false), 700)
+    }, 800)
   }
 
   const handleCancelEditComment = () => {
@@ -160,135 +179,111 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   }
 
   return (
-    <div className="p-4">
-      {/* ---------- 게시글 영역 ---------- */}
+    <div className="p-4 max-w-2xl mx-auto">
+      {/* ---------- 게시글 ---------- */}
       {editingPost ? (
-        <div className="p-2 mb-4 border rounded">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-1 mb-2 border rounded"
-          />
+        <div className="p-2 mb-4 border rounded bg-gray-50">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 mb-2 border rounded" />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full h-32 p-1 mb-2 border rounded"
+            className="w-full h-32 p-2 mb-2 border rounded"
           />
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="w-full p-1 mb-2 border rounded"
+            className="w-full p-2 mb-2 border rounded"
           />
-          <div>
+          <div className="flex justify-end gap-2">
             <button
               onClick={handleSavePost}
-              className="px-3 py-1 mr-2 text-white bg-green-500 rounded"
+              disabled={isPostSubmitting}
+              className={`px-3 py-1 text-white rounded ${
+                isPostSubmitting ? "bg-green-300" : "bg-green-500 hover:bg-green-600"
+              }`}
             >
-              저장
+              {isPostSubmitting ? "처리 중..." : "저장"}
             </button>
-            <button
-              onClick={() => setEditingPost(false)}
-              className="px-3 py-1 bg-gray-300 rounded"
-            >
+            <button onClick={() => setEditingPost(false)} className="px-3 py-1 bg-gray-300 rounded">
               취소
             </button>
           </div>
         </div>
       ) : (
         <>
-          <h2 className="mb-2 text-xl font-bold">{post.title}</h2>
-          <p className="mb-2 whitespace-pre-wrap">{post.content}</p>
-          <p className="mb-3 text-sm text-gray-500">
-            작성자: {post.nickname} / 작성일: {new Date(post.createdAt).toLocaleString()}
+          <h2 className="mb-2 text-xl font-bold break-words">{post.title}</h2>
+          <p className="mb-2 whitespace-pre-wrap break-words">{post.content}</p>
+          <p className="text-sm text-gray-500 mb-4">
+            작성자: {post.nickname} • 작성일: {new Date(post.createdAt).toLocaleString()}
           </p>
-          <div className="mb-4">
-            <button
-              onClick={handleStartEditPost}
-              className="px-2 py-1 mr-2 text-white bg-blue-500 rounded"
-            >
+          <div className="flex gap-2">
+            <button onClick={handleStartEditPost} className="px-2 py-1 bg-blue-500 text-white rounded">
               수정
             </button>
-            <button
-              onClick={handleDeletePost}
-              className="px-2 py-1 text-white bg-red-500 rounded"
-            >
+            <button onClick={handleDeletePost} className="px-2 py-1 bg-red-500 text-white rounded">
               삭제
             </button>
           </div>
         </>
       )}
 
-      {/* ---------- 댓글 영역 ---------- */}
-      <div className="mt-4">
-        <h3 className="mb-2 font-semibold">댓글</h3>
-
+      {/* ---------- 댓글 ---------- */}
+      <div className="mt-6">
+        <h3 className="font-semibold mb-2">댓글</h3>
         {postComments.length === 0 ? (
-          <p className="mb-2">댓글이 없습니다.</p>
+          <p className="text-gray-500">댓글이 없습니다.</p>
         ) : (
-          <ul>
-            {postComments.map((c) => (
-              <li key={c.id} className="flex items-start justify-between mb-2 ml-2">
-                <div className="flex-1">
-                  {editingCommentId === c.id ? (
-                    <div>
-                      <input
-                        value={editingCommentNickname}
-                        onChange={(e) => setEditingCommentNickname(e.target.value)}
-                        className="w-full p-1 mb-1 border rounded"
-                      />
-                      <input
-                        value={editingCommentContent}
-                        onChange={(e) => setEditingCommentContent(e.target.value)}
-                        className="w-full p-1 mb-1 border rounded"
-                      />
-                      <div>
-                        <button
-                          onClick={() => handleSaveEditComment(c.id)}
-                          className="px-2 py-1 mr-2 text-white bg-green-500 rounded"
-                        >
-                          저장
-                        </button>
-                        <button
-                          onClick={handleCancelEditComment}
-                          className="px-2 py-1 bg-gray-300 rounded"
-                        >
-                          취소
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="text-sm text-gray-600">
-                        {c.nickname} • {new Date(c.createdAt).toLocaleString()}
-                      </div>
-                      <div className="mt-1">{c.content}</div>
-                    </div>
-                  )}
-                </div>
-
-                {editingCommentId !== c.id && (
-                  <div className="flex flex-col gap-1 ml-4">
+          postComments.map((c) => (
+            <div key={c.id} className="p-2 mb-2 border-b">
+              {editingCommentId === c.id ? (
+                <>
+                  <input
+                    value={editingCommentNickname}
+                    onChange={(e) => setEditingCommentNickname(e.target.value)}
+                    className="w-full p-1 mb-1 border rounded"
+                  />
+                  <textarea
+                    value={editingCommentContent}
+                    onChange={(e) => setEditingCommentContent(e.target.value)}
+                    className="w-full p-1 mb-1 border rounded"
+                  />
+                  <div className="flex justify-end gap-2">
                     <button
-                      onClick={() => handleStartEditComment(c)}
-                      className="text-blue-500"
+                      onClick={() => handleSaveEditComment(c.id)}
+                      disabled={isEditingCommentSubmitting}
+                      className={`px-2 py-1 text-white rounded ${
+                        isEditingCommentSubmitting ? "bg-green-300" : "bg-green-500 hover:bg-green-600"
+                      }`}
                     >
+                      {isEditingCommentSubmitting ? "처리 중..." : "저장"}
+                    </button>
+                    <button onClick={handleCancelEditComment} className="px-2 py-1 bg-gray-300 rounded">
+                      취소
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-sm text-gray-600">
+                    {c.nickname} • {new Date(c.createdAt).toLocaleString()}
+                  </div>
+                  <p className="mt-1">{c.content}</p>
+                  <div className="flex gap-2 mt-1">
+                    <button onClick={() => handleStartEditComment(c)} className="text-blue-500 text-sm">
                       수정
                     </button>
-                    <button
-                      onClick={() => handleDeleteComment(c.id)}
-                      className="text-red-500"
-                    >
+                    <button onClick={() => handleDeleteComment(c.id)} className="text-red-500 text-sm">
                       삭제
                     </button>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                </>
+              )}
+            </div>
+          ))
         )}
 
-        {/* ---------- 댓글 작성 폼 ---------- */}
-        <div className="p-3 mt-3 border rounded">
+        {/* 댓글 작성 */}
+        <div className="p-3 border rounded mt-4 bg-gray-50">
           <input
             placeholder="닉네임(1~10자)"
             value={newCommentNickname}
@@ -301,14 +296,9 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
             onChange={(e) => setNewCommentContent(e.target.value)}
             className="w-full p-1 mb-2 border rounded"
           />
-          <div>
-            <button
-              onClick={handleAddComment}
-              className="px-3 py-1 text-white bg-blue-500 rounded"
-            >
-              작성
-            </button>
-          </div>
+          <button onClick={handleAddComment} className="px-3 py-1 bg-blue-500 text-white rounded">
+            작성
+          </button>
         </div>
       </div>
     </div>

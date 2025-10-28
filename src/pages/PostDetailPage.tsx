@@ -22,18 +22,16 @@ export const PostDetailPage: React.FC = () => {
     comments.filter((c) => c.postId === postId && !c.deleted)
   )
 
-  // 게시글 수정 상태
   const [editingPost, setEditingPost] = useState(false)
   const [title, setTitle] = useState(post.title)
   const [content, setContent] = useState(post.content)
   const [nickname, setNickname] = useState(post.nickname)
 
-  // 댓글 작성 상태
   const [newCommentContent, setNewCommentContent] = useState("")
   const [newCommentNickname, setNewCommentNickname] = useState("")
   const [newCommentPassword, setNewCommentPassword] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 댓글 수정 상태
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editContent, setEditContent] = useState("")
   const [editNickname, setEditNickname] = useState("")
@@ -41,14 +39,8 @@ export const PostDetailPage: React.FC = () => {
   /* ---------- 공용 비밀번호 확인 함수 ---------- */
   const handleCheckPassword = (correctPw: string): boolean => {
     const pw = prompt("비밀번호(4자리 숫자)를 입력하세요.") ?? ""
-    if (!isValidPassword(pw)) {
-      alert("비밀번호는 4자리 숫자만 가능합니다.")
-      return false
-    }
-    if (pw !== correctPw) {
-      alert("비밀번호가 일치하지 않습니다.")
-      return false
-    }
+    if (!isValidPassword(pw)) return alert("비밀번호는 4자리 숫자만 가능합니다."), false
+    if (pw !== correctPw) return alert("비밀번호가 일치하지 않습니다."), false
     return true
   }
 
@@ -59,17 +51,27 @@ export const PostDetailPage: React.FC = () => {
   }
 
   const handleSavePost = () => {
-    const updated = {
-      ...post,
-      title: title.trim(),
-      content: content.trim(),
-      nickname: nickname.trim(),
-      updatedAt: new Date().toISOString(),
-    }
-    posts[postIndex] = updated
-    setPost(updated)
-    setEditingPost(false)
-    alert("게시글이 수정되었습니다.")
+    if (isSubmitting) return // 중복 클릭 방지
+    setIsSubmitting(true)
+
+    // ✅ 0.8초 후 수정 반영
+    setTimeout(() => {
+      const updated = {
+        ...post,
+        title: title.trim(),
+        content: content.trim(),
+        nickname: nickname.trim(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      posts[postIndex] = updated
+      setPost(updated)
+      setEditingPost(false)
+      alert("게시글이 수정되었습니다.")
+
+      // ✅ 0.7초 뒤 버튼 다시 활성화
+      setTimeout(() => setIsSubmitting(false), 700)
+    }, 800)
   }
 
   /* ---------- 게시글 삭제 ---------- */
@@ -82,28 +84,46 @@ export const PostDetailPage: React.FC = () => {
 
   /* ---------- 댓글 추가 ---------- */
   const handleAddComment = () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
     const content = newCommentContent.trim()
     const nickname = newCommentNickname.trim()
     const password = newCommentPassword.trim()
 
-    if (!isValidContent(content)) return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
-    if (!isValidNickname(nickname)) return alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
-    if (!isValidPassword(password)) return alert("비밀번호는 4자리 숫자만 가능합니다.")
-
-    const comment: Comment = {
-      id: Date.now(),
-      postId,
-      content,
-      nickname,
-      password,
-      createdAt: new Date().toISOString(),
+    if (!isValidContent(content)) {
+      alert("댓글 내용은 1~200자 이내로 입력해주세요.")
+      return setIsSubmitting(false)
+    }
+    if (!isValidNickname(nickname)) {
+      alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+      return setIsSubmitting(false)
+    }
+    if (!isValidPassword(password)) {
+      alert("비밀번호는 4자리 숫자만 가능합니다.")
+      return setIsSubmitting(false)
     }
 
-    comments.push(comment)
-    setPostComments((prev) => [...prev, comment])
-    setNewCommentContent("")
-    setNewCommentNickname("")
-    setNewCommentPassword("")
+    // ✅ 0.8초 후 댓글 반영 (작성 중... 표시 유지)
+    setTimeout(() => {
+      const comment: Comment = {
+        id: Date.now(),
+        postId,
+        content,
+        nickname,
+        password,
+        createdAt: new Date().toISOString(),
+      }
+
+      comments.push(comment)
+      setPostComments((prev) => [...prev, comment])
+      setNewCommentContent("")
+      setNewCommentNickname("")
+      setNewCommentPassword("")
+
+      // ✅ 0.7초 뒤에 버튼 다시 활성화
+      setTimeout(() => setIsSubmitting(false), 700)
+    }, 800)
   }
 
   /* ---------- 댓글 삭제 ---------- */
@@ -121,32 +141,58 @@ export const PostDetailPage: React.FC = () => {
   /* ---------- 댓글 수정 ---------- */
   const handleStartEditComment = (c: Comment) => {
     const pw = prompt("댓글 비밀번호(4자리 숫자)를 입력하세요.") ?? ""
-    if (!isValidPassword(pw) || pw !== c.password) return alert("비밀번호가 일치하지 않습니다.")
+    if (!isValidPassword(pw) || pw !== c.password)
+      return alert("비밀번호가 일치하지 않습니다.")
     setEditingCommentId(c.id)
     setEditContent(c.content)
     setEditNickname(c.nickname)
   }
 
   const handleSaveEditComment = (id: number) => {
+    if (isSubmitting) return // 중복 클릭 방지
+    setIsSubmitting(true)
+
     const content = editContent.trim()
     const nickname = editNickname.trim()
 
-    if (!isValidContent(content)) return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
-    if (!isValidNickname(nickname)) return alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+    if (!isValidContent(content)) {
+      alert("댓글 내용은 1~200자 이내로 입력해주세요.")
+      return setIsSubmitting(false)
+    }
+    if (!isValidNickname(nickname)) {
+      alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
+      return setIsSubmitting(false)
+    }
 
-    const idx = comments.findIndex((c) => c.id === id)
-    if (idx === -1) return
+    // ✅ 0.8초 후 수정 반영
+    setTimeout(() => {
+      const idx = comments.findIndex((c) => c.id === id)
+      if (idx === -1) return
 
-    comments[idx] = { ...comments[idx], content, nickname, updatedAt: new Date().toISOString() }
-    setPostComments((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, content, nickname, updatedAt: new Date().toISOString() } : c
+      comments[idx] = {
+        ...comments[idx],
+        content,
+        nickname,
+        updatedAt: new Date().toISOString(),
+      }
+
+      setPostComments((prev) =>
+        prev.map((c) =>
+          c.id === id
+            ? { ...c, content, nickname, updatedAt: new Date().toISOString() }
+            : c
+        )
       )
-    )
-    setEditingCommentId(null)
-    setEditContent("")
-    setEditNickname("")
+
+      setEditingCommentId(null)
+      setEditContent("")
+      setEditNickname("")
+
+      // ✅ 0.7초 후 버튼 다시 활성화
+      setTimeout(() => setIsSubmitting(false), 700)
+    }, 800)
   }
+
 
   const handleCancelEditComment = () => {
     setEditingCommentId(null)
@@ -155,38 +201,43 @@ export const PostDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl p-4 mx-auto">
+    <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto w-full">
       {/* ---------- 게시글 ---------- */}
       {editingPost ? (
-        <div className="p-4 mb-4 border rounded">
+        <div className="border p-4 mb-4 rounded shadow-sm bg-white">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-2 mb-2 border rounded"
+            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             placeholder="제목 (1~20자)"
           />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full h-40 p-2 mb-2 border rounded"
+            className="border p-2 w-full mb-2 rounded h-40 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             placeholder="내용 (1~3000자)"
           />
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
+            className="border p-2 w-full mb-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
             placeholder="닉네임 (1~10자)"
           />
-          <div className="flex justify-end space-x-2">
+          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 justify-end">
             <button
               onClick={handleSavePost}
-              className="px-3 py-1 text-white bg-green-500 rounded"
+              disabled={isSubmitting}
+              className={`bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition ${
+                isSubmitting
+                  ? "bg-green-300 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
             >
-              저장
+              {isSubmitting ? "수정 중..." : "게시글 수정"}
             </button>
             <button
               onClick={() => setEditingPost(false)}
-              className="px-3 py-1 bg-gray-300 rounded"
+              className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 transition"
             >
               취소
             </button>
@@ -194,22 +245,21 @@ export const PostDetailPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <h2 className="mb-2 text-2xl font-bold">{post.title}</h2>
-          <p className="mb-2 whitespace-pre-wrap">{post.content}</p>
-          <p className="mb-4 text-sm text-gray-500">
-            작성자: {post.nickname} / 작성일:{" "}
-            {new Date(post.createdAt).toLocaleString()}
+          <h2 className="text-2xl font-bold mb-2 break-words">{post.title}</h2>
+          <p className="whitespace-pre-wrap mb-2 break-words">{post.content}</p>
+          <p className="text-sm text-gray-500 mb-4">
+            작성자: {post.nickname} / 작성일: {new Date(post.createdAt).toLocaleString()}
           </p>
-          <div className="flex mb-6 space-x-2">
+          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mb-6">
             <button
               onClick={handleEditPost}
-              className="px-3 py-1 text-white bg-blue-500 rounded"
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
             >
               수정
             </button>
             <button
               onClick={handleDeletePost}
-              className="px-3 py-1 text-white bg-red-500 rounded"
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
             >
               삭제
             </button>
@@ -218,59 +268,64 @@ export const PostDetailPage: React.FC = () => {
       )}
 
       {/* ---------- 댓글 ---------- */}
-      <div className="pt-4 border-t">
-        <h3 className="mb-2 text-lg font-semibold">댓글</h3>
+      <div className="border-t pt-4 mt-4">
+        <h3 className="font-semibold text-lg mb-2">댓글</h3>
         {postComments.length === 0 ? (
           <p>댓글이 없습니다.</p>
         ) : (
           <ul>
             {postComments.map((c) => (
-              <li key={c.id} className="py-2 border-b">
+              <li key={c.id} className="border-b py-2">
                 {editingCommentId === c.id ? (
                   <div>
                     <input
                       value={editNickname}
                       onChange={(e) => setEditNickname(e.target.value)}
-                      className="w-full p-1 mb-2 border rounded"
+                      className="border p-1 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
                     />
                     <textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full p-1 mb-2 border rounded"
+                      className="border p-1 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
                     />
                     <div className="flex justify-end space-x-2">
                       <button
                         onClick={() => handleSaveEditComment(c.id)}
-                        className="px-2 py-1 text-white bg-green-500 rounded"
+                        disabled={isSubmitting}
+                        className={`bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition ${
+                          isSubmitting
+                            ? "bg-green-300 cursor-not-allowed"
+                            : "bg-green-500 hover:bg-green-600"
+                        }`}
                       >
-                        저장
+                        {isSubmitting ? "수정 중..." : "댓글 수정"}
                       </button>
                       <button
                         onClick={handleCancelEditComment}
-                        className="px-2 py-1 bg-gray-300 rounded"
+                        className="bg-gray-300 px-2 py-1 rounded hover:bg-gray-400 transition"
                       >
                         취소
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-start justify-between">
+                  <div className="flex justify-between items-start">
                     <div>
                       <div className="text-sm text-gray-600">
                         {c.nickname} • {new Date(c.createdAt).toLocaleString()}
                       </div>
-                      <div>{c.content}</div>
+                      <div className="break-words">{c.content}</div>
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <button
                         onClick={() => handleStartEditComment(c)}
-                        className="text-sm text-blue-500"
+                        className="text-blue-500 text-sm hover:underline"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDeleteComment(c.id)}
-                        className="text-sm text-red-500"
+                        className="text-red-500 text-sm hover:underline"
                       >
                         삭제
                       </button>
@@ -283,32 +338,37 @@ export const PostDetailPage: React.FC = () => {
         )}
 
         {/* ---------- 댓글 작성 ---------- */}
-        <div className="p-3 mt-4 border rounded">
+        <div className="mt-4 border p-3 rounded shadow-sm bg-gray-50">
           <input
             value={newCommentNickname}
             onChange={(e) => setNewCommentNickname(e.target.value)}
-            placeholder="닉네임 (1~10자, 특수문자 제외)"
-            className="w-full p-2 mb-2 border rounded"
+            placeholder="닉네임 (1~10자)"
+            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
           />
           <textarea
             value={newCommentContent}
             onChange={(e) => setNewCommentContent(e.target.value)}
             placeholder="댓글 내용 (1~200자)"
-            className="w-full p-2 mb-2 border rounded"
+            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
           />
           <input
             type="password"
             value={newCommentPassword}
             onChange={(e) => setNewCommentPassword(e.target.value)}
             placeholder="비밀번호 (4자리 숫자)"
-            className="w-full p-2 mb-2 border rounded"
+            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
           />
           <div className="flex justify-end">
             <button
               onClick={handleAddComment}
-              className="px-3 py-1 text-white bg-blue-500 rounded"
+              disabled={isSubmitting}
+              className={`text-white px-4 py-2 rounded transition ${
+                isSubmitting
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
             >
-              댓글 작성
+              {isSubmitting ? "작성 중..." : "댓글 작성"}
             </button>
           </div>
         </div>
