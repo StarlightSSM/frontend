@@ -1,6 +1,6 @@
 export interface Comment {
   id: number
-  postId: number
+  boardId: number
   content: string
   nickname: string
   password: string
@@ -9,7 +9,7 @@ export interface Comment {
   deleted?: boolean
 }
 
-export interface Post {
+export interface Board {
   id: number
   title: string
   content: string

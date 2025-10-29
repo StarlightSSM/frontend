@@ -1,15 +1,15 @@
 import React, { useState } from "react"
-import { Post } from "../types/types.js"
+import { Board } from "../types/types.js"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button.js"
 
-interface PostFormProps {
+interface BoardFormProps {
   mode: "create" | "edit"
-  initial?: Partial<Post>
+  initial?: Partial<Board>
   onSubmit: (data: { title: string; content: string; nickname: string; password: string }) => Promise<void> | void
 }
 
-export const PostForm: React.FC<PostFormProps> = ({ mode, initial = {}, onSubmit }) => {
+export const BoardForm: React.FC<BoardFormProps> = ({ mode, initial = {}, onSubmit }) => {
   const navigate = useNavigate()
   const [title, setTitle] = useState(initial.title || "")
   const [content, setContent] = useState(initial.content || "")

@@ -1,18 +1,18 @@
 import React, { useState } from "react"
 import { Link } from "react-router-dom"
-import { posts as initialPosts } from "../data/posts.js"
+import { boards as initialBoards } from "../data/boards.js"
 import { Card } from "components/ui/card.js"
 import { Button } from "@/components/ui/button.js"
 
 const ITEMS_PER_PAGE = 10
 
-export const PostList: React.FC = () => {
+export const BoardList: React.FC = () => {
   const [page, setPage] = useState(1)
-  const sortedPosts = [...initialPosts].sort(
+  const sortedBoards = [...initialBoards].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
-  const paginated = sortedPosts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
-  const totalPages = Math.ceil(sortedPosts.length / ITEMS_PER_PAGE)
+  const paginated = sortedBoards.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(sortedBoards.length / ITEMS_PER_PAGE)
 
   return (
     <div className="space-y-4">
@@ -23,16 +23,16 @@ export const PostList: React.FC = () => {
         </Link>
       </div>
 
-      {paginated.map((post) => (
+      {paginated.map((board) => (
         <Card
-          key={post.id}
+          key={board.id}
           className="p-4 transition-colors bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
         >
-          <Link to={`/post/${post.id}`}>
-            <h3 className="text-lg font-semibold">{post.title}</h3>
-            <p className="text-sm text-gray-500">{post.nickname}</p>
+          <Link to={`/boards/${board.id}`}>
+            <h3 className="text-lg font-semibold">{board.title}</h3>
+            <p className="text-sm text-gray-500">{board.nickname}</p>
             <p className="text-xs text-gray-400">
-              {new Date(post.createdAt).toLocaleString()}
+              {new Date(board.createdAt).toLocaleString()}
             </p>
           </Link>
         </Card>

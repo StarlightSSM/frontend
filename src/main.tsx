@@ -1,8 +1,10 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { App } from "./App.js";
-import "./index.css"; // Tailwind 또는 기본 CSS
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { App } from "./App.js"
+import "./index.css" // TailwindCSS 스타일 포함
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <App />
-);
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)

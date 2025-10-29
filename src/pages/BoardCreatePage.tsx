@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { posts } from "@/data/posts.js"
-import { Post } from "@/types/types.js"
+import { boards } from "@/data/boards.js"
+import { Board } from "@/types/types.js"
 
 // 유효성 검사 함수
 const isValidTitle = (s: string) => s.trim().length > 0 && s.trim().length <= 20
@@ -9,7 +9,7 @@ const isValidContent = (s: string) => s.trim().length > 0 && s.trim().length <= 
 const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
 const isValidPassword = (s: string) => /^[0-9]{4}$/.test(s)
 
-export const PostCreatePage: React.FC = () => {
+export const BoardCreatePage: React.FC = () => {
   const navigate = useNavigate()
 
   const [title, setTitle] = useState("")
@@ -18,7 +18,7 @@ export const PostCreatePage: React.FC = () => {
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleAddPost = () => {
+  const handleAddBoard = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
 
@@ -42,7 +42,7 @@ export const PostCreatePage: React.FC = () => {
 
     // 일정시간 후 게시글 추가 (중복 제출 방지)
     setTimeout(() => {
-      const newPost: Post = {
+      const newBoard: Board = {
         id: Date.now(),
         title: title.trim(),
         content: content.trim(),
@@ -51,7 +51,7 @@ export const PostCreatePage: React.FC = () => {
         createdAt: new Date().toISOString(),
       }
 
-      posts.unshift(newPost)
+      boards.unshift(newBoard)
       alert("게시글이 등록되었습니다.")
 
       // 일정시간 후 버튼 다시 활성화
@@ -95,7 +95,7 @@ export const PostCreatePage: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
           <button
-            onClick={handleAddPost}
+            onClick={handleAddBoard}
             disabled={isSubmitting}
             className={`text-white px-4 py-2 rounded transition ${
               isSubmitting

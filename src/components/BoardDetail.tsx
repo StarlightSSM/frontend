@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState } from "react"
-import { Post, Comment } from "@/types/types.js"
-import { posts, comments } from "@/data/posts.js"
+import { Board, Comment } from "@/types/types.js"
+import { boards, comments } from "@/data/boards.js"
 import { useNavigate } from "react-router-dom"
 
 /* --- Validation helpers --- */
@@ -11,25 +11,25 @@ const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
 const isValidPassword = (s: string) => /^[0-9]{4}$/.test(s)
 
 interface Props {
-  postId: number
+  boardId: number
 }
 
-export const PostDetail: React.FC<Props> = ({ postId }) => {
+export const BoardDetail: React.FC<Props> = ({ boardId }) => {
   const navigate = useNavigate()
-  const postIndex = posts.findIndex((p) => p.id === postId && !p.deleted)
-  if (postIndex === -1) return <p>게시물을 찾을 수 없습니다.</p>
+  const boardIndex = boards.findIndex((b) => b.id === boardId && !b.deleted)
+  if (boardIndex === -1) return <p>게시물을 찾을 수 없습니다.</p>
 
-  const [post, setPost] = useState<Post>(posts[postIndex])
-  const [postComments, setPostComments] = useState<Comment[]>(
-    comments.filter((c) => c.postId === postId && !c.deleted)
+  const [board, setBoard] = useState<Board>(boards[boardIndex])
+  const [boardComments, setBoardComments] = useState<Comment[]>(
+    comments.filter((c) => c.boardId === boardId && !c.deleted)
   )
 
   // 게시글 수정 상태
-  const [editingPost, setEditingPost] = useState(false)
-  const [title, setTitle] = useState(post.title)
-  const [content, setContent] = useState(post.content)
-  const [nickname, setNickname] = useState(post.nickname)
-  const [isPostSubmitting, setIsPostSubmitting] = useState(false)
+  const [editingBoard, setEditingBoard] = useState(false)
+  const [title, setTitle] = useState(board.title)
+  const [content, setContent] = useState(board.content)
+  const [nickname, setNickname] = useState(board.nickname)
+  const [isBoardSubmitting, setIsBoardSubmitting] = useState(false)
 
   // 댓글 상태
   const [newCommentContent, setNewCommentContent] = useState("")
@@ -40,54 +40,54 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   const [isEditingCommentSubmitting, setIsEditingCommentSubmitting] = useState(false)
 
   /* ---------- 게시글 수정 ---------- */
-  const handleStartEditPost = () => {
+  const handleStartEditBoard = () => {
     const inputPw = window.prompt("게시글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== post.password)
+    if (!isValidPassword(inputPw) || inputPw !== board.password)
       return alert("비밀번호가 일치하지 않습니다.")
-    setEditingPost(true)
+    setEditingBoard(true)
   }
 
-  const handleSavePost = () => {
-    if (isPostSubmitting) return
-    setIsPostSubmitting(true)
+  const handleSaveBoard = () => {
+    if (isBoardSubmitting) return
+    setIsBoardSubmitting(true)
 
     if (!isValidTitle(title)) {
       alert("제목은 1~20자 이내로 입력해주세요.")
-      return setIsPostSubmitting(false)
+      return setIsBoardSubmitting(false)
     }
     if (!isValidContent(content, 3000)) {
       alert("내용은 1~3000자 이내로 입력해주세요.")
-      return setIsPostSubmitting(false)
+      return setIsBoardSubmitting(false)
     }
     if (!isValidNickname(nickname)) {
       alert("닉네임은 특수문자 없이 1~10자 이내로 입력해주세요.")
-      return setIsPostSubmitting(false)
+      return setIsBoardSubmitting(false)
     }
 
     // 0.8초 지연 후 저장
     setTimeout(() => {
-      const updated: Post = {
-        ...post,
+      const updated: Board = {
+        ...board,
         title: title.trim(),
         content: content.trim(),
         nickname: nickname.trim(),
         updatedAt: new Date().toISOString(),
       }
 
-      posts[postIndex] = updated
-      setPost(updated)
-      setEditingPost(false)
+      boards[boardIndex] = updated
+      setBoard(updated)
+      setEditingBoard(false)
       alert("게시글이 수정되었습니다.")
-      setTimeout(() => setIsPostSubmitting(false), 700)
+      setTimeout(() => setIsBoardSubmitting(false), 700)
     }, 800)
   }
 
   /* ---------- 게시글 삭제 ---------- */
-  const handleDeletePost = () => {
+  const handleDeleteBoard = () => {
     const inputPw = window.prompt("게시글 비밀번호(4자리)를 입력하세요.") ?? ""
-    if (!isValidPassword(inputPw) || inputPw !== post.password)
+    if (!isValidPassword(inputPw) || inputPw !== board.password)
       return alert("비밀번호가 일치하지 않습니다.")
-    posts[postIndex] = { ...posts[postIndex], deleted: true, updatedAt: new Date().toISOString() }
+    boards[boardIndex] = { ...boards[boardIndex], deleted: true, updatedAt: new Date().toISOString() }
     alert("게시글이 삭제되었습니다.")
     navigate("/")
   }
@@ -104,7 +104,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
 
     const comment: Comment = {
       id: Date.now(),
-      postId,
+      boardId,
       content,
       nickname: nick,
       password: pw,
@@ -112,7 +112,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
     }
 
     comments.push(comment)
-    setPostComments((prev) => [...prev, comment])
+    setBoardComments((prev) => [...prev, comment])
     setNewCommentContent("")
     setNewCommentNickname("")
   }
@@ -127,7 +127,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
       return alert("비밀번호가 일치하지 않습니다.")
 
     comments[idx] = { ...comments[idx], deleted: true, updatedAt: new Date().toISOString() }
-    setPostComments((prev) => prev.filter((c) => c.id !== id))
+    setBoardComments((prev) => prev.filter((c) => c.id !== id))
   }
 
   /* ---------- 댓글 수정 ---------- */
@@ -161,7 +161,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
       if (idx === -1) return
 
       comments[idx] = { ...comments[idx], content, nickname: nick, updatedAt: new Date().toISOString() }
-      setPostComments((prev) =>
+      setBoardComments((prev) =>
         prev.map((c) => (c.id === id ? { ...c, content, nickname: nick, updatedAt: new Date().toISOString() } : c))
       )
 
@@ -181,7 +181,7 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
   return (
     <div className="p-4 max-w-2xl mx-auto">
       {/* ---------- 게시글 ---------- */}
-      {editingPost ? (
+      {editingBoard ? (
         <div className="p-2 mb-4 border rounded bg-gray-50">
           <input
             value={title}
@@ -203,31 +203,31 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
           />
           <div className="flex justify-end gap-2">
             <button
-              onClick={handleSavePost}
-              disabled={isPostSubmitting}
+              onClick={handleSaveBoard}
+              disabled={isBoardSubmitting}
               className={`px-3 py-1 text-white rounded ${
-                isPostSubmitting ? "bg-green-300" : "bg-green-500 hover:bg-green-600"
+                isBoardSubmitting ? "bg-green-300" : "bg-green-500 hover:bg-green-600"
               }`}
             >
-              {isPostSubmitting ? "처리 중..." : "저장"}
+              {isBoardSubmitting ? "처리 중..." : "저장"}
             </button>
-            <button onClick={() => setEditingPost(false)} className="px-3 py-1 bg-gray-300 rounded">
+            <button onClick={() => setEditingBoard(false)} className="px-3 py-1 bg-gray-300 rounded">
               취소
             </button>
           </div>
         </div>
       ) : (
         <>
-          <h2 className="mb-2 text-xl font-bold break-words">{post.title}</h2>
-          <p className="mb-2 whitespace-pre-wrap break-words">{post.content}</p>
+          <h2 className="mb-2 text-xl font-bold break-words">{board.title}</h2>
+          <p className="mb-2 whitespace-pre-wrap break-words">{board.content}</p>
           <p className="text-sm text-gray-500 mb-4">
-            작성자: {post.nickname} • 작성일: {new Date(post.createdAt).toLocaleString()}
+            작성자: {board.nickname} • 작성일: {new Date(board.createdAt).toLocaleString()}
           </p>
           <div className="flex gap-2">
-            <button onClick={handleStartEditPost} className="px-2 py-1 bg-blue-500 text-white rounded">
+            <button onClick={handleStartEditBoard} className="px-2 py-1 bg-blue-500 text-white rounded">
               수정
             </button>
-            <button onClick={handleDeletePost} className="px-2 py-1 bg-red-500 text-white rounded">
+            <button onClick={handleDeleteBoard} className="px-2 py-1 bg-red-500 text-white rounded">
               삭제
             </button>
           </div>
@@ -237,10 +237,10 @@ export const PostDetail: React.FC<Props> = ({ postId }) => {
       {/* ---------- 댓글 ---------- */}
       <div className="mt-6">
         <h3 className="font-semibold mb-2">댓글</h3>
-        {postComments.length === 0 ? (
+        {boardComments.length === 0 ? (
           <p className="text-gray-500">댓글이 없습니다.</p>
         ) : (
-          postComments.map((c) => (
+          boardComments.map((c) => (
             <div key={c.id} className="p-2 mb-2 border-b">
               {editingCommentId === c.id ? (
                 <>

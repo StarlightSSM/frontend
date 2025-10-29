@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { Post } from "@/types/types.js"
-import { posts } from "@/data/posts.js"
+import { Board } from "@/types/types.js"
+import { boards } from "@/data/boards.js"
 
 // 유효성 검사 함수
 const isValidTitle = (s: string) => s.trim().length > 0 && s.trim().length <= 20
@@ -9,12 +9,12 @@ const isValidContent = (s: string) => s.trim().length > 0 && s.trim().length <= 
 const isValidNickname = (s: string) => /^[A-Za-z가-힣0-9]{1,10}$/.test(s)
 const isValidPassword = (s: string) => /^[0-9]{4}$/.test(s)
 
-export const PostEditPage: React.FC = () => {
+export const BoardEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const postId = Number(id)
+  const boardId = Number(id)
 
-  const [post, setPost] = useState<Post | null>(null)
+  const [board, setBoard] = useState<Board | null>(null)
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [nickname, setNickname] = useState("")
@@ -24,16 +24,16 @@ export const PostEditPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    const target = posts.find((p) => p.id === postId && !p.deleted)
+    const target = boards.find((b) => b.id === boardId && !b.deleted)
     if (target) {
-      setPost(target)
+      setBoard(target)
       setTitle(target.title)
       setContent(target.content)
       setNickname(target.nickname)
     }
-  }, [postId])
+  }, [boardId])
 
-  if (!post) return <div className="p-4">게시글을 찾을 수 없습니다.</div>
+  if (!board) return <div className="p-4">게시글을 찾을 수 없습니다.</div>
 
   // 수정 버튼 클릭 → 비밀번호 입력창 표시
   const handleStartUpdate = () => {
@@ -51,7 +51,7 @@ export const PostEditPage: React.FC = () => {
       setPwError("비밀번호는 4자리 숫자여야 합니다.")
       return setIsSubmitting(false)
     }
-    if (inputPw !== post.password) {
+    if (inputPw !== board.password) {
       setPwError("비밀번호가 일치하지 않습니다.")
       return setIsSubmitting(false)
     }
@@ -71,20 +71,20 @@ export const PostEditPage: React.FC = () => {
 
     // 일정시간 후 실제 수정 반영 (중복 제출 방지)
     setTimeout(() => {
-      const updated: Post = {
-        ...post,
+      const updated: Board = {
+        ...board,
         title: title.trim(),
         content: content.trim(),
         nickname: nickname.trim(),
         updatedAt: new Date().toISOString(),
       }
 
-      const idx = posts.findIndex((p) => p.id === postId)
-      if (idx !== -1) posts[idx] = updated
-      setPost(updated)
+      const idx = boards.findIndex((b) => b.id === boardId)
+      if (idx !== -1) boards[idx] = updated
+      setBoard(updated)
 
       alert("게시글이 수정되었습니다.")
-      navigate(`/posts/${postId}`)
+      navigate(`/boards/${boardId}`)
 
       // 일정시간 후 버튼 다시 활성화
       setTimeout(() => setIsSubmitting(false), 700)
@@ -161,7 +161,7 @@ export const PostEditPage: React.FC = () => {
               수정 완료
             </button>
             <button
-              onClick={() => navigate(`/posts/${postId}`)}
+              onClick={() => navigate(`/boards/${boardId}`)}
               className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
             >
               취소
