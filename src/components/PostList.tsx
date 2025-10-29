@@ -16,7 +16,7 @@ export const PostList: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">📋 게시판</h2>
         <Link to="/create">
           <Button>글 작성하기</Button>
@@ -24,16 +24,22 @@ export const PostList: React.FC = () => {
       </div>
 
       {paginated.map((post) => (
-        <Card key={post.id} className="p-4 hover:bg-gray-50">
+        <Card
+          key={post.id}
+          className="p-4 transition-colors bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
+        >
           <Link to={`/post/${post.id}`}>
             <h3 className="text-lg font-semibold">{post.title}</h3>
             <p className="text-sm text-gray-500">{post.nickname}</p>
-            <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleString()}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(post.createdAt).toLocaleString()}
+            </p>
           </Link>
         </Card>
+
       ))}
 
-      <div className="flex justify-center space-x-2 mt-4">
+      <div className="flex justify-center mt-4 space-x-2">
         {Array.from({ length: totalPages }).map((_, i) => (
           <Button
             key={i}

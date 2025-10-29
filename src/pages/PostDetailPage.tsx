@@ -201,29 +201,29 @@ export const PostDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto w-full">
+    <div className="w-full max-w-3xl p-4 mx-auto sm:p-6 md:p-8">
       {/* ---------- 게시글 ---------- */}
       {editingPost ? (
-        <div className="border p-4 mb-4 rounded shadow-sm bg-white">
+        <div className="p-4 mb-4 bg-white border rounded shadow-sm">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full p-2 mb-2 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
             placeholder="제목 (1~20자)"
           />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="border p-2 w-full mb-2 rounded h-40 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full h-40 p-2 mb-2 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
             placeholder="내용 (1~3000자)"
           />
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="border p-2 w-full mb-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full p-2 mb-4 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
             placeholder="닉네임 (1~10자)"
           />
-          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 justify-end">
+          <div className="flex flex-col justify-end space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
             <button
               onClick={handleSavePost}
               disabled={isSubmitting}
@@ -237,7 +237,7 @@ export const PostDetailPage: React.FC = () => {
             </button>
             <button
               onClick={() => setEditingPost(false)}
-              className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 transition"
+              className="px-3 py-1 transition bg-gray-300 rounded hover:bg-gray-400"
             >
               취소
             </button>
@@ -245,21 +245,21 @@ export const PostDetailPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <h2 className="text-2xl font-bold mb-2 break-words">{post.title}</h2>
-          <p className="whitespace-pre-wrap mb-2 break-words">{post.content}</p>
-          <p className="text-sm text-gray-500 mb-4">
+          <h2 className="mb-2 text-2xl font-bold break-words">{post.title}</h2>
+          <p className="mb-2 break-words whitespace-pre-wrap">{post.content}</p>
+          <p className="mb-4 text-sm text-gray-500">
             작성자: {post.nickname} / 작성일: {new Date(post.createdAt).toLocaleString()}
           </p>
-          <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mb-6">
+          <div className="flex flex-col mb-6 space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
             <button
               onClick={handleEditPost}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+              className="px-3 py-1 text-white transition bg-blue-500 rounded hover:bg-blue-600"
             >
               수정
             </button>
             <button
               onClick={handleDeletePost}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+              className="px-3 py-1 text-white transition bg-red-500 rounded hover:bg-red-600"
             >
               삭제
             </button>
@@ -268,29 +268,29 @@ export const PostDetailPage: React.FC = () => {
       )}
 
       {/* ---------- 댓글 ---------- */}
-      <div className="border-t pt-4 mt-4">
-        <h3 className="font-semibold text-lg mb-2">댓글</h3>
+      <div className="pt-4 mt-4 border-t">
+        <h3 className="mb-2 text-lg font-semibold">댓글</h3>
         {postComments.length === 0 ? (
           <p>댓글이 없습니다.</p>
         ) : (
           <ul>
             {postComments.map((c) => (
-              <li key={c.id} className="border-b py-2">
+              <li key={c.id} className="py-2 border-b">
                 {editingCommentId === c.id ? (
                   <div>
                     <input
-                      value={newCommentNickname}
-                      onChange={(e) => setNewCommentNickname(e.target.value)}
+                      value={editNickname}
+                      onChange={(e) => setEditNickname(e.target.value)}
                       placeholder="닉네임 (1~10자)"
                       aria-label="닉네임 입력"
-                      className="border p-2 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
+                      className="w-full p-2 mb-2 transition border rounded focus:ring-2 focus:ring-blue-300"
                     />
                     <textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       placeholder="댓글 내용 (1~200자)"
                       aria-label="댓글 내용 입력"
-                      className="border p-1 w-full mb-2 rounded focus:ring-2 focus:ring-blue-300 transition"
+                      className="w-full p-1 mb-2 transition border rounded focus:ring-2 focus:ring-blue-300"
                     />
                     <div className="flex justify-end space-x-2">
                       <button
@@ -306,14 +306,14 @@ export const PostDetailPage: React.FC = () => {
                       </button>
                       <button
                         onClick={handleCancelEditComment}
-                        className="bg-gray-300 px-2 py-1 rounded hover:bg-gray-400 transition"
+                        className="px-2 py-1 transition bg-gray-300 rounded hover:bg-gray-400"
                       >
                         취소
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-start justify-between">
                     <div>
                       <div className="text-sm text-gray-600">
                         {c.nickname} • {new Date(c.createdAt).toLocaleString()}
@@ -323,13 +323,13 @@ export const PostDetailPage: React.FC = () => {
                     <div className="flex flex-col items-end space-y-1">
                       <button
                         onClick={() => handleStartEditComment(c)}
-                        className="text-blue-500 text-sm hover:underline"
+                        className="text-sm text-blue-500 hover:underline"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDeleteComment(c.id)}
-                        className="text-red-500 text-sm hover:underline"
+                        className="text-sm text-red-500 hover:underline"
                       >
                         삭제
                       </button>
@@ -342,25 +342,25 @@ export const PostDetailPage: React.FC = () => {
         )}
 
         {/* ---------- 댓글 작성 ---------- */}
-        <div className="mt-4 border p-3 rounded shadow-sm bg-gray-50">
+        <div className="p-3 mt-4 border rounded shadow-sm bg-gray-50">
           <input
             value={newCommentNickname}
             onChange={(e) => setNewCommentNickname(e.target.value)}
             placeholder="닉네임 (1~10자)"
-            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full p-2 mb-2 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <textarea
             value={newCommentContent}
             onChange={(e) => setNewCommentContent(e.target.value)}
             placeholder="댓글 내용 (1~200자)"
-            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full p-2 mb-2 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <input
             type="password"
             value={newCommentPassword}
             onChange={(e) => setNewCommentPassword(e.target.value)}
             placeholder="비밀번호 (4자리 숫자)"
-            className="border p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+            className="w-full p-2 mb-2 transition border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <div className="flex justify-end">
             <button
