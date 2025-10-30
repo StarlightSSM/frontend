@@ -4,13 +4,15 @@ import { BoardListPage } from "@/pages/BoardListPage.js"
 import { BoardCreatePage } from "@/pages/BoardCreatePage.js"
 import { BoardDetailPage } from "@/pages/BoardDetailPage.js"
 import { BoardEditPage } from "@/pages/BoardEditPage.js"
+import { TestBoardPage } from "@/pages/TestBoardPage.js"
+
 
 export const Router: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         {/* 게시글 목록 */}
-        <Route path="/" element={<BoardListPage />} />
+        <Route path="/boards" element={<BoardListPage />} />
 
         {/* 게시글 작성 */}
         <Route path="/create" element={<BoardCreatePage />} />
@@ -23,6 +25,9 @@ export const Router: React.FC = () => {
 
         {/* 잘못된 경로 처리 */}
         <Route path="*" element={<p className="p-6 text-center">페이지를 찾을 수 없습니다 😢</p>} />
+
+        {/* 테스트 페이지 */}
+        <Route path="/test" element={<TestBoardPage />} />
       </Routes>
     </BrowserRouter>
   )
