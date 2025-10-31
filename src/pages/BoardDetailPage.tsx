@@ -181,7 +181,7 @@ export const BoardDetailPage: React.FC = () => {
           삭제 🗑️
         </button>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/boards")}
           className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
         >
           목록으로
