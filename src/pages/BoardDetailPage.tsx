@@ -7,6 +7,7 @@ interface Comment {
   nickname: string
   content: string
   createdAt: string
+  updatedAt?: string // ✅ 수정 시각 추가
 }
 
 interface Board {
@@ -28,7 +29,7 @@ export const BoardDetailPage: React.FC = () => {
   const [error, setError] = useState("")
   const [newComment, setNewComment] = useState({ nickname: "", content: "", password: "" })
 
-  // 🔐 비밀번호 모달 상태
+  // 🔐 댓글 수정/삭제 모달 상태
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [password, setPassword] = useState("")
   const [targetCommentId, setTargetCommentId] = useState<number | null>(null)
@@ -36,13 +37,21 @@ export const BoardDetailPage: React.FC = () => {
   const [editContent, setEditContent] = useState("")
   const [editNickname, setEditNickname] = useState("")
 
+  // 🔐 게시글 삭제 모달 상태
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState("")
+
+  // 상태 관리
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
   // ✅ 게시글 상세 조회
   const fetchBoard = async () => {
     if (!id) return
     setLoading(true)
     try {
       const res = await axios.get<{ data: Board; message: string }>(
-        `http://localhost:8080/boards/${boardId}`
+        `http://localhost:8085/boards/${boardId}`
       )
       setBoard(res.data.data)
       setError("")
@@ -63,21 +72,26 @@ export const BoardDetailPage: React.FC = () => {
     if (!board) return
     const { nickname, content, password } = newComment
 
-    if (!nickname.trim() || nickname.length > 10)
-      return alert("닉네임은 1~10자 이내로 입력해주세요.")
-    if (!content.trim() || content.length > 200)
-      return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
-    if (!/^[0-9]{4}$/.test(password))
-      return alert("비밀번호는 4자리 숫자여야 합니다.")
+    // ✅ 유효성 검사
+    const isValidNickname = nickname.trim().length > 0 && nickname.length <= 10
+    const isValidContent = content.trim().length > 0 && content.length <= 200
+    const isValidPassword = /^[0-9]{4}$/.test(password)
+
+    if (!isValidNickname) return alert("닉네임은 1~10자 이내로 입력해주세요.")
+    if (!isValidContent) return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
+    if (!isValidPassword) return alert("비밀번호는 4자리 숫자여야 합니다.")
 
     try {
-      await axios.post(`http://localhost:8080/boards/${board.id}/comments`, newComment)
+      setIsSubmitting(true)
+      await axios.post(`http://localhost:8085/boards/${board.id}/comments`, newComment)
       alert("댓글이 등록되었습니다 ✅")
       setNewComment({ nickname: "", content: "", password: "" })
       fetchBoard()
     } catch (err) {
       console.error(err)
       alert("댓글 등록 실패 ❌")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -86,21 +100,27 @@ export const BoardDetailPage: React.FC = () => {
     navigate(`/boards/${boardId}/edit`)
   }
 
-  /* ---------------- 게시글 삭제 ---------------- */
-  const handleDeletePost = async () => {
-    const password = prompt("게시글 비밀번호(4자리 숫자)를 입력하세요.")
-    if (!password) return
-    if (!/^[0-9]{4}$/.test(password)) return alert("비밀번호는 4자리 숫자여야 합니다.")
+  /* ---------------- 게시글 삭제 (모달) ---------------- */
+  const handleDeletePost = () => {
+    setShowDeleteModal(true)
+    setDeletePassword("")
+  }
+
+  const confirmDeletePost = async () => {
+    if (!/^[0-9]{4}$/.test(deletePassword))
+      return alert("비밀번호는 4자리 숫자여야 합니다.")
 
     try {
-      await axios.delete(`http://localhost:8080/boards/${boardId}`, {
-        params: { password },
+      await axios.delete(`http://localhost:8085/boards/${boardId}`, {
+        params: { password: deletePassword },
       })
       alert("게시글이 삭제되었습니다 🗑️")
-      navigate("/")
+      navigate("/boards")
     } catch (err) {
       console.error(err)
       alert("게시글 삭제 실패 ❌ (비밀번호 불일치 또는 서버 오류)")
+    } finally {
+      setShowDeleteModal(false)
     }
   }
 
@@ -131,24 +151,56 @@ export const BoardDetailPage: React.FC = () => {
       return alert("비밀번호는 4자리 숫자여야 합니다.")
 
     try {
+      setIsUpdating(true)
+
       if (actionType === "delete") {
         await axios.delete(
-          `http://localhost:8080/boards/comments/${targetCommentId}`,
+          `http://localhost:8085/boards/comments/${targetCommentId}`,
           { params: { password } }
         )
         alert("댓글이 삭제되었습니다 🗑️")
       } else if (actionType === "edit") {
+        const originalComment = board?.comments.find((c) => c.id === targetCommentId)
+        if (!originalComment) return alert("댓글을 찾을 수 없습니다.")
+
+        const trimmedNickname = editNickname.trim()
+        const trimmedContent = editContent.trim()
+
+        const isValidNickname =
+          trimmedNickname.length > 0 && trimmedNickname.length <= 10
+        const isValidContent =
+          trimmedContent.length > 0 && trimmedContent.length <= 200
+
+        // ✅ 동일 내용일 경우 수정 불가 처리
+        const isSameContent =
+          trimmedNickname === originalComment.nickname &&
+          trimmedContent === originalComment.content
+
+        if (!isValidNickname) return alert("닉네임은 1~10자 이내로 입력해주세요.")
+        if (!isValidContent) return alert("댓글 내용은 1~200자 이내로 입력해주세요.")
+        if (isSameContent) {
+          alert("변경된 내용이 없습니다.")
+          closePasswordModal()
+          return
+        }
+
         await axios.put(
-          `http://localhost:8080/boards/comments/${targetCommentId}`,
-          { content: editContent.trim(), nickname: editNickname.trim(), password }
+          `http://localhost:8085/boards/comments/${targetCommentId}`,
+          {
+            content: trimmedContent,
+            nickname: trimmedNickname,
+            password,
+          }
         )
         alert("댓글이 수정되었습니다 ✏️")
       }
+
       fetchBoard()
     } catch (err) {
       console.error(err)
       alert("비밀번호 불일치 또는 요청 실패 ❌")
     } finally {
+      setIsUpdating(false)
       closePasswordModal()
     }
   }
@@ -197,9 +249,6 @@ export const BoardDetailPage: React.FC = () => {
               <div className="flex justify-between">
                 <div>
                   <span className="font-semibold">{c.nickname}</span>
-                  <span className="ml-2 text-sm text-gray-500">
-                    {new Date(c.createdAt).toLocaleString()}
-                  </span>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -228,30 +277,42 @@ export const BoardDetailPage: React.FC = () => {
       <div className="p-3 mt-4 border rounded bg-gray-50">
         <h3 className="mb-2 font-semibold">댓글 작성</h3>
         <input
-          placeholder="닉네임"
+          placeholder="닉네임 (1~10자)"
           value={newComment.nickname}
-          onChange={(e) => setNewComment({ ...newComment, nickname: e.target.value })}
+          onChange={(e) => {
+            const value = e.target.value
+            if (value.length <= 10)
+              setNewComment({ ...newComment, nickname: value })
+          }}
           className="w-full p-2 mb-2 border rounded"
         />
         <textarea
-          placeholder="댓글 내용"
+          placeholder="댓글 내용 (1~200자)"
           value={newComment.content}
-          onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
+          onChange={(e) => {
+            const value = e.target.value
+            if (value.length <= 200)
+              setNewComment({ ...newComment, content: value })
+          }}
           className="w-full p-2 mb-2 border rounded"
         />
         <input
-          placeholder="비밀번호 (4자리)"
+          type="password"
+          placeholder="비밀번호 (4자리 숫자)"
           value={newComment.password}
-          onChange={(e) => setNewComment({ ...newComment, password: e.target.value })}
-          maxLength={4}
-          inputMode="numeric"
+          onChange={(e) => {
+            const value = e.target.value
+            if (/^[0-9]{0,4}$/.test(value))
+              setNewComment({ ...newComment, password: value })
+          }}
           className="w-full p-2 mb-2 border rounded"
+          inputMode="numeric"
         />
         <button
           onClick={handleAddComment}
           className="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600"
         >
-          댓글 작성
+          {isSubmitting ? "작성중..." : "댓글 작성"}
         </button>
       </div>
 
@@ -268,16 +329,20 @@ export const BoardDetailPage: React.FC = () => {
                 <input
                   type="text"
                   value={editNickname}
-                  onChange={(e) => setEditNickname(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value.length <= 10) setEditNickname(value)
+                  }}
                   placeholder="닉네임 (1~10자)"
-                  maxLength={10}
                   className="w-full p-2 mb-2 border rounded"
                 />
                 <textarea
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value.length <= 200) setEditContent(value)
+                  }}
                   placeholder="댓글 내용 (1~200자)"
-                  maxLength={200}
                   className="w-full p-2 mb-3 border rounded resize-none"
                 />
               </>
@@ -286,20 +351,59 @@ export const BoardDetailPage: React.FC = () => {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value
+                if (/^[0-9]{0,4}$/.test(value)) setPassword(value)
+              }}
               maxLength={4}
               placeholder="비밀번호 (4자리 숫자)"
               className="w-full p-2 mb-4 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
+
             <div className="flex justify-center gap-3">
               <button
                 onClick={handleConfirmPassword}
                 className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
               >
-                확인
+                {isUpdating
+                  ? actionType === "edit"
+                    ? "수정중..."
+                    : "삭제중..."
+                  : "확인"}
               </button>
               <button
                 onClick={closePasswordModal}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔒 게시글 삭제 모달 */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="p-6 text-center bg-white rounded shadow-lg w-80">
+            <h3 className="mb-3 text-lg font-semibold text-gray-800">게시글 삭제</h3>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              maxLength={4}
+              placeholder="비밀번호 (4자리 숫자)"
+              className="w-full p-2 mb-4 text-center border rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+            />
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={confirmDeletePost}
+                className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
+              >
+                삭제
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
               >
                 취소

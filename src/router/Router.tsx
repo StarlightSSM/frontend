@@ -1,10 +1,10 @@
 import React from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { BoardListPage } from "@/pages/BoardListPage.js"
-import { BoardCreatePage } from "@/pages/BoardCreatePage.js"
-import { BoardDetailPage } from "@/pages/BoardDetailPage.js"
-import { BoardEditPage } from "@/pages/BoardEditPage.js"
-import { TestBoardPage } from "@/pages/TestBoardPage.js"
+import { BoardListPage } from "@/pages/BoardListPage"
+import { BoardCreatePage } from "@/pages/BoardCreatePage"
+import { BoardDetailPage } from "@/pages/BoardDetailPage"
+import { BoardEditPage } from "@/pages/BoardEditPage"
+import { TestBoardPage } from "@/pages/TestBoardPage"
 
 
 export const Router: React.FC = () => {

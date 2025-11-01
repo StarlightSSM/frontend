@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { boardAPI } from "@/components/lib/board.js"
+import { boardAPI } from "@/components/lib/board"
 import axios from "axios"
 
 interface Comment {
@@ -58,7 +58,7 @@ export const TestBoardPage: React.FC = () => {
   /** ✅ 게시글 상세 조회 */
   const fetchBoardDetail = async (id) => {
     try {
-        const res = await axios.get(`http://localhost:8080/boards/${id}`)
+        const res = await axios.get(`http://localhost:8085/boards/${id}`)
         setSelectedBoard(res.data.data)
     } catch (err) {
         console.error(err)

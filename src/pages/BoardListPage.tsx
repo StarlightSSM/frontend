@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button.js"
-import { boardAPI } from "@/components/lib/board.js"
+import { Button } from "@/components/ui/button"
+import { boardAPI } from "@/components/lib/board"
 
 // ✅ 백엔드 데이터 구조에 맞춘 타입 정의
 interface Board {
