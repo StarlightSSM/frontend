@@ -40,15 +40,43 @@ export const BoardListPage: React.FC = () => {
 
   // ✅ 삭제되지 않은 글만 필터링 + 최신순 정렬
   const visiblePosts = boards
-  .filter((p) => !p.deleted)
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .filter((p) => !p.deleted)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
 
   const totalPages = Math.ceil(visiblePosts.length / boardsPerPage)
   const indexOfLast = currentPage * boardsPerPage
   const indexOfFirst = indexOfLast - boardsPerPage
   const currentBoards = visiblePosts.slice(indexOfFirst, indexOfLast)
 
-  const handlePageChange = (page: number) => setCurrentPage(page)
+  // ✅ 페이지 이동 공통 함수 (범위 강제: 1 ~ totalPages)
+  const goToPage = (page: number) => {
+    if (totalPages === 0) return
+    const clamped = Math.max(1, Math.min(totalPages, page))
+    setCurrentPage(clamped)
+  }
+
+  // ✅ <<  : 5페이지 앞으로 (예: 7 → 2, 3 → 1)
+  const handleFirstBlock = () => {
+    goToPage(currentPage - 5)
+  }
+
+  // ✅ <  : 1페이지 앞으로
+  const handlePrev = () => {
+    goToPage(currentPage - 1)
+  }
+
+  // ✅ >  : 1페이지 뒤로
+  const handleNext = () => {
+    goToPage(currentPage + 1)
+  }
+
+  // ✅ >> : 5페이지 뒤로 (예: 2 → 7, 단 최대 totalPages까지)
+  const handleLastBlock = () => {
+    goToPage(currentPage + 5)
+  }
 
   return (
     <div className="max-w-3xl p-6 mx-auto">
@@ -80,19 +108,77 @@ export const BoardListPage: React.FC = () => {
       {/* ✅ 페이지네이션 */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 space-x-2">
+          {/* << : 5페이지 앞으로 */}
+          <button
+            type="button"
+            onClick={handleFirstBlock}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {"<<"}
+          </button>
+
+          {/* < : 1페이지 앞으로 */}
+          <button
+            type="button"
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {"<"}
+          </button>
+
+          {/* 페이지 번호들 */}
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i + 1}
-              onClick={() => handlePageChange(i + 1)}
+              type="button"
+              onClick={() => goToPage(i + 1)}
               className={`px-3 py-1 rounded ${
                 currentPage === i + 1
                   ? "bg-blue-500 text-white"
-                  : "bg-gray-200"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               {i + 1}
             </button>
           ))}
+
+          {/* > : 1페이지 뒤로 */}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {">"}
+          </button>
+
+          {/* >> : 5페이지 뒤로 */}
+          <button
+            type="button"
+            onClick={handleLastBlock}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+          >
+            {">>"}
+          </button>
         </div>
       )}
 
